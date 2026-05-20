@@ -11,7 +11,7 @@ st.set_page_config(
 
 # --- العنوان والوصف ---
 st.markdown("# 🤖 بوت المحادثة الذكي")
-st.markdown("بوت محادثة قوي وسريع يعمل بواسطة **Groq API** و **Llama 3**")
+st.markdown("بوت محادثة قوي وسريع يعمل بواسطة **Groq API** و **Mixtral**")
 
 # --- تهيئة مفتاح API ---
 def get_groq_api_key():
@@ -62,16 +62,20 @@ if prompt := st.chat_input("اكتب سؤالك هنا..."):
     with st.chat_message("assistant"):
         # إظهار مؤشر الكتابة
         with st.spinner("جاري الكتابة..."):
-            # إرسال الرسائل إلى Groq API
-            response = client.chat.completions.create(
-                model="llama3-8b-8192",
-                messages=st.session_state.messages,
-                temperature=0.7,
-                max_tokens=1024,
-                stream=False
-            )
-            bot_reply = response.choices[0].message.content
-            st.markdown(bot_reply)
+            try:
+                # إرسال الرسائل إلى Groq API
+                response = client.chat.completions.create(
+                    model="mixtral-8x7b-32768",  # النموذج المجاني والموثوق
+                    messages=st.session_state.messages,
+                    temperature=0.7,
+                    max_tokens=1024,
+                    stream=False
+                )
+                bot_reply = response.choices[0].message.content
+                st.markdown(bot_reply)
+            except Exception as e:
+                st.error(f"حدث خطأ: {e}")
+                st.stop()
 
     # حفظ رد البوت في السجل
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
