@@ -1,35 +1,42 @@
 import streamlit as st
 from groq import Groq
 
-st.set_page_config(page_title="بوت شركتي", page_icon="🏢")
-st.title("🏢 بوت خدمة العملاء")
+st.set_page_config(page_title="بوت خدمة العملاء", page_icon="🏢")
+st.title("🏢 بوت خدمة العملاء - شركة تقنيات المستقبل")
 
 api_key = st.secrets["GROQ_API_KEY"]
 client = Groq(api_key=api_key)
 
-# تعريف شخصية البوت ومعلومات الشركة
+# تعليمات صارمة وواضحة للبوت
 SYSTEM_PROMPT = """
-أنت مساعد ذكي لشركة "تقنيات المستقبل". شركتنا تعمل في مجال البرمجة والذكاء الاصطناعي.
-خدماتنا:
-- تطوير تطبيقات الهاتف
-- تصميم مواقع الويب
-- استشارات تقنية
+أنت بوت خدمة عملاء رسمي لشركة "تقنيات المستقبل" (FutureTech).
 
-ساعات العمل: من الأحد إلى الخميس، 9 صباحاً إلى 5 مساءً.
-مقر الشركة: الرياض، المملكة العربية السعودية.
+معلومات الشركة:
+- النشاط: تطوير تطبيقات الهاتف ومواقع الويب وحلول الذكاء الاصطناعي
+- ساعات العمل: الأحد إلى الخميس 9ص-5م
+- التواصل: support@futuretech.com
 
-رد على العملاء بلباقة واحترافية. إذا سألك العميل عن شيء خارج نطاق الشركة، قل له "سأحولك إلى فريق الدعم البشري".
+أهم القواعد:
+1. لا تسأل العميل "ماذا تريد؟" أو "كيف يمكنني مساعدتك؟" أكثر من مرة.
+2. لا تتحدث عن مواضيع خارج نطاق الشركة (مثل التسويق العام، الموارد البشرية، تحسين الإنتاجية العامة).
+3. إذا سأل العميل عن شيء لا تعرفه، قل: "سأحولك إلى فريق الدعم البشري فوراً".
+4. كن مباشراً ومفيداً. قدم إجابات قصيرة وعملية.
+5. لا تطرح أسئلة استفسارية مفتوحة مثل "هل تريد أن تعرف المزيد عن...؟".
+
+ردودك يجب أن تكون احترافية ومحددة.
 """
 
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
+# عرض المحادثة السابقة
 for msg in st.session_state.messages:
     if msg["role"] != "system":
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-if prompt := st.chat_input("اكتب سؤالك عن الشركة:"):
+# إدخال المستخدم
+if prompt := st.chat_input("اكتب سؤالك عن خدمات الشركة..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -39,7 +46,7 @@ if prompt := st.chat_input("اكتب سؤالك عن الشركة:"):
             response = client.chat.completions.create(
                 model="llama-3.1-8b-instant",
                 messages=st.session_state.messages,
-                temperature=0.7
+                temperature=0.5  # أقل من 0.7 لجعل الردود أكثر تحديداً وأقل عشوائية
             )
             reply = response.choices[0].message.content
             st.markdown(reply)
