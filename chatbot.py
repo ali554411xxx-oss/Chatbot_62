@@ -1,48 +1,40 @@
 import streamlit as st
 from groq import Groq
 
-st.set_page_config(page_title="بوت خدمة العملاء", page_icon="🏢")
-st.title("🏢 بوت خدمة العملاء - شركة تقنيات المستقبل")
+st.set_page_config(page_title="بوتي", page_icon="🤖")
+st.title("🤖 بوت المحادثة")
 
-api_key = st.secrets["GROQ_API_KEY"]
+try:
+    api_key = st.secrets["GROQ_API_KEY"]
+except:
+    st.error("🔐 لم يتم إعداد مفتاح API. راجع إعدادات Secrets.")
+    st.stop()
+
 client = Groq(api_key=api_key)
 
-SYSTEM_PROMPT = """
-أنت بوت خدمة عملاء رسمي لشركة "تقنيات المستقبل" (FutureTech).
-
-معلومات الشركة:
-- النشاط: تطوير تطبيقات الهاتف ومواقع الويب وحلول الذكاء الاصطناعي
-- ساعات العمل: الأحد إلى الخميس 9ص-5م
-- التواصل: support@futuretech.com
-
-أهم القواعد:
-1. لا تسأل العميل "ماذا تريد؟" أو "كيف يمكنني مساعدتك؟" أكثر من مرة.
-2. لا تتحدث عن مواضيع خارج نطاق الشركة.
-3. إذا سأل العميل عن شيء لا تعرفه، قل: "سأحولك إلى فريق الدعم البشري فوراً".
-4. كن مباشراً ومفيداً. قدم إجابات قصيرة وعملية.
-"""
-
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    st.session_state.messages = []
 
 for msg in st.session_state.messages:
-    if msg["role"] != "system":
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
-if prompt := st.chat_input("اكتب سؤالك عن خدمات الشركة..."):
+if prompt := st.chat_input("اكتب سؤالك..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
         with st.spinner("..."):
-            response = client.chat.completions.create(
-                model="llama-3.1-8b-instant",
-                messages=st.session_state.messages,
-                temperature=0.5
-            )
-            reply = response.choices[0].message.content
-            st.markdown(reply)
-    st.session_state.messages.append({"role": "assistant", "content": reply})
+            try:
+                response = client.chat.completions.create(
+                    model="llama-3.1-8b-instant",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.7
+                )
+                reply = response.choices[0].message.content
+                st.markdown(reply)
+                st.session_state.messages.append({"role": "assistant", "content": reply})
+            except Exception as e:
+                st.error(f"خطأ: {e}")
     st.rerun()
