@@ -57,7 +57,7 @@ if prompt := st.chat_input("اكتب سؤالك هنا..."):
     with st.chat_message("user"):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
-
+model="llama-3.1-8b-instant",
     # عرض رد البوت
     with st.chat_message("assistant"):
         # إظهار مؤشر الكتابة
